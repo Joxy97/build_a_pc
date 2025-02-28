@@ -10,10 +10,12 @@ The PC Builder Prototype is a GUI-based application written in Python that helps
 - **Component Scoring:**  
   Each component is evaluated in four categories: **Gaming**, **ML/AI**, **HPC**, and **3D Rendering**. The scoring is performed by comparing each component against a baseline product (typically the oldest or the worst-performing model, with all scores set to 1).  
   The score for each task is computed using a formula of the form:
+
   Score_task = (Sum over specs [(x_spec / baseline_spec)^(nonlinear_scaling_factor) * weight_spec]) * baseline_score
 
-  Here, the nonlinear scaling factor models the nonlinear improvement of performance with the specification, and the baseline score is 1.  
-- **RAM Specifics:** For RAM, an additional factor is introduced that includes the number of channels of the motherboard. This factor multiplies non-capacity terms during the score summation.
+  Here, the nonlinear scaling factor models the nonlinear improvement of performance with the specification, and the baseline score is 1.
+
+  For RAM, an additional factor is introduced that includes the number of channels of the motherboard. This factor multiplies non-capacity terms during the score summation to model the bonus of single, double or quad configurations.
 
 - **Data Processing:**  
 After calculating the raw scores, the data is loaded into Python where:
@@ -25,7 +27,7 @@ After calculating the raw scores, the data is loaded into Python where:
 The application then generates all possible builds (combinations of one GPU, one CPU, and one RAM). For each build, the following are computed:
   - **Total Price and Total Power Consumption**
   - **Final Build Score:**  
-      Calculated as a weighted harmonic mean of the individual component scores.  
+      Calculated as a weighted harmonic mean of the individual component scores. Harmonic mean penalizes differences in component scores, favorizing well-balanced builds.
       The weights for each component are determined by combining user-provided task weights with a relevance matrix (which specifies how important each component type is for each task).
   - **Efficiency Metric:**
       The build’s cost efficiency is computed as the ratio of Build Score to Total Price.
@@ -34,7 +36,8 @@ The application then generates all possible builds (combinations of one GPU, one
 A composite recommendation score is calculated as a weighted combination of:
   - The normalized absolute performance (Build Score) and
   - The normalized efficiency (Score-to-Price Ratio).  
-The formula used is:  
+The formula used is:
+
 R = α · (BuildScore / P_max) + (1 – α) · (ScoreToPrice / E_max)
 
 where `α` (ranging from 0 to 1) is a tradeoff parameter (set by the user via a slider) that determines the emphasis between absolute performance and cost efficiency.

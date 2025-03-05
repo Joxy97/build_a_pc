@@ -1,24 +1,29 @@
 import pandas as pd
-
-from .settings import *
-from .data_loader import *
+from .settings import TASKS
+from .data_loader import load_specifications
 
 def preprocess_data(df_list, tasks=TASKS):
     """
-    Preprocesses a list of DataFrames by dropping rows with missing prices
-    and normalizing each score column to a 0-100 range.
+    Preprocesses a list of DataFrames by:
+      - Adding a unique "ID" column (starting at 1) to each DataFrame.
+      - Computing an average price ("Avg Price") as the mean of "Price Min" and "Price Max" if available.
+      - Normalizing each score column to a 0-100 range.
     
     Args:
-        df_list (list): List of pandas DataFrames (e.g., [df_gpus, df_cpus, df_rams]).
-        score_columns (list): List of column names containing scores to normalize.
+        df_list (list): List of pandas DataFrames (e.g., [df_gpus, df_cpus, df_mbs, df_rams]).
+        tasks (list): List of tasks for which scores should be normalized.
         
     Returns:
         list: List of processed DataFrames.
     """
     processed_list = []
     for df in df_list:
-        # Drop rows where 'Price' is missing
-        df = df.dropna(subset=["Price"]).copy()
+        # Insert a unique ID column starting from 1.
+        df.insert(0, "ID", range(1, len(df) + 1))
+        
+        # Compute an average price from 'Price Min' and 'Price Max' if those columns exist.
+        if "Price Min" in df.columns and "Price Max" in df.columns:
+            df["Avg Price"] = (df["Price Min"] + df["Price Max"]) / 2
         
         # Normalize each score column: score -> (score / max * 100)
         for task in tasks:
@@ -32,10 +37,13 @@ def preprocess_data(df_list, tasks=TASKS):
     return processed_list
 
 if __name__ == "__main__":    
-    gpus, cpus, rams = load_specifications()
+    # Load data for all four component types (GPUs, CPUs, Motherboards, RAMs)
+    gpus, cpus, mbs, rams = load_specifications()
     
-    # Preprocess the data for all three components
-    gpus, cpus, rams = preprocess_data([gpus, cpus, rams])
+    # Preprocess the data for all components (ID column will be added here)
+    gpus, cpus, mbs, rams = preprocess_data([gpus, cpus, mbs, rams])
     
     print("Processed GPUs:")
-    print(cpus[["CPU", "Price", "Gaming Score", "ML/AI Score", "HPC Score", "3D Rendering Score"]])
+    print(gpus[["ID", "Gaming Score", "ML/AI Score", "HPC Score", "3D Rendering Score", "Avg Price"]].head())
+    print("Processed CPUs:")
+    print(cpus[["ID", "Gaming Score", "ML/AI Score", "HPC Score", "3D Rendering Score", "Avg Price"]].head())

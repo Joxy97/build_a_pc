@@ -1,22 +1,8 @@
 import pandas as pd
 from .settings import ALPHA, MIN_PRICE, MAX_PRICE, USER_WEIGHTS
+from .filters import filter_builds_by_price_range
 from .build_scoring import score_builds
 from .recommendation import compute_composite_recommendation_score, filter_top_in_group
-
-def filter_builds_by_price_range(builds_df, min_price=MIN_PRICE, max_price=MAX_PRICE):
-    """
-    Filters the builds DataFrame by ensuring that the build's Price Min falls within the specified range.
-    
-    Args:
-        builds_df (pd.DataFrame): DataFrame containing builds with a "Price Min" column.
-        min_price (float): Minimum acceptable price.
-        max_price (float): Maximum acceptable price.
-        
-    Returns:
-        pd.DataFrame: Filtered DataFrame where Price Min is within the given range.
-    """
-    price_filtered_builds = builds_df[(builds_df["Price Min"] >= min_price) & (builds_df["Price Min"] <= max_price)]
-    return price_filtered_builds
 
 def get_first(x):
     """Return the first element if x is a list; otherwise return x."""
@@ -51,8 +37,8 @@ def cross_join(df1, df2):
     return merged
 
 def build_maker_batched(df_gpus, df_cpus, df_mbs, df_rams,
-                        min_price=MIN_PRICE, max_price=MAX_PRICE,
-                        user_weights=USER_WEIGHTS, top_n=10):
+                        min_price, max_price,
+                        user_weights, alpha, top_n=10):
     """
     Batched build generation.
     Input DataFrames use original column names. This function first namespaces each
@@ -162,12 +148,13 @@ def build_maker_batched(df_gpus, df_cpus, df_mbs, df_rams,
         
         # 8. Process the batch:
         batch_builds = batch_builds[["GPU", "CPU", "Motherboard", "RAM", "Total Power", "GPU Task Score", "CPU Task Score", "RAM Task Score", "CPU Main Direct PCIe Version", "GPU Main PCIe Version", "MB Main PCIe Version", "Leftover CPU Lanes", "Price Min", "Price Max", "GPU ID", "CPU ID", "MB ID", "RAM ID"]]
+
         filtered_batch = filter_builds_by_price_range(batch_builds, min_price, max_price)
         if filtered_batch.empty:
             continue
 
         scored_batch = score_builds(filtered_batch, user_weights)
-        batch_rec = compute_composite_recommendation_score(scored_batch, alpha=user_weights.get("alpha", 0.7))
+        batch_rec = compute_composite_recommendation_score(scored_batch, alpha)
         # Group by GPU (since CPU is fixed) and pick top_n builds.
         grouped_batch = filter_top_in_group(batch_rec, ["GPU"], score_col="Recommendation Score")
         top_builds = grouped_batch.head(top_n).copy()
@@ -182,7 +169,7 @@ def build_maker_batched(df_gpus, df_cpus, df_mbs, df_rams,
     
     final_df = pd.concat(final_builds, ignore_index=True)
     # Final recommendation scoring on the full final DataFrame.
-    final_df = compute_composite_recommendation_score(final_df, alpha=user_weights.get("alpha", 0.7))
+    final_df = compute_composite_recommendation_score(final_df, alpha)
     final_df = filter_top_in_group(final_df, ["GPU", "CPU"], score_col="Recommendation Score")
     final_df.sort_values("Recommendation Score", inplace=True)
     final_df.reset_index(drop=True, inplace=True)

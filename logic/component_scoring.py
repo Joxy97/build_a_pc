@@ -56,7 +56,7 @@ def compute_component_scores_for_df(df, user_weights):
     )
     return df
 
-def score_all_dfs(filtered_dfs, user_weights=USER_WEIGHTS):
+def score_all_dfs(filtered_dfs, user_weights):
     """
     Applies the weighted score calculation for all DataFrames in the tuple.
     

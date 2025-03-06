@@ -1,7 +1,7 @@
 import pandas as pd
 from .settings import ALPHA
 
-def pick_best_by_model(df, alpha=ALPHA):
+def pick_best_by_model(df, alpha):
     """
     For a scored GPU or RAM DataFrame (which must include at least the following columns:
       - "Model" (as string),
@@ -51,7 +51,7 @@ def pick_best_by_model(df, alpha=ALPHA):
             result.drop(columns=[col], inplace=True)
     return result
 
-def smart_picker(scored_components):
+def smart_picker(scored_components, alpha):
     """
     Given a dictionary mapping component categories (e.g., "GPU" and "RAM")
     to their scored DataFrames, group each DataFrame by the "Model" column and select the best variant.
@@ -67,7 +67,7 @@ def smart_picker(scored_components):
     picked = {}
     for comp, df in scored_components.items():
         if "Model" in df.columns:
-            picked[comp] = pick_best_by_model(df)
+            picked[comp] = pick_best_by_model(df, alpha)
         else:
             picked[comp] = df.copy()
     return picked

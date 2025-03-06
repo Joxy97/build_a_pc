@@ -1,4 +1,5 @@
 import pandas as pd
+from .settings import *
 
 # ----------------------------------------------------------------------
 # Helper Functions for Filtering
@@ -67,6 +68,7 @@ def apply_gpu_filters(df, filters=None):
     """
     filters = filters or {}
     filtered_df = df.copy()
+    #filtered_df = filtered_df[(filtered_df["Price Min"] >= MIN_PRICE) & (filtered_df["Price Min"] <= MAX_PRICE)]
 
     # Categorical filters
     for col in ["Brand", "Series", "Manufacturer"]:
@@ -105,6 +107,7 @@ def apply_cpu_filters(df, filters=None):
     """
     filters = filters or {}
     filtered_df = df.copy()
+    #filtered_df = filtered_df[(filtered_df["Price Min"] >= MIN_PRICE) & (filtered_df["Price Min"] <= MAX_PRICE)]
 
     for col in ["Brand", "Type", "Series", "CPU Socket"]:
         if col in filters:
@@ -142,6 +145,7 @@ def apply_mb_filters(df, filters=None):
     """
     filters = filters or {}
     filtered_df = df.copy()
+    #filtered_df = filtered_df[(filtered_df["Price Min"] >= MIN_PRICE) & (filtered_df["Price Min"] <= MAX_PRICE)]
 
     for col in ["Manufacturer", "Form Factor", "CPU Socket", "Chipset", "RAM Type"]:
         if col in filters:
@@ -170,6 +174,7 @@ def apply_ram_filters(df, filters=None):
     """
     filters = filters or {}
     filtered_df = df.copy()
+    #filtered_df = filtered_df[(filtered_df["Price Min"] >= MIN_PRICE) & (filtered_df["Price Min"] <= MAX_PRICE)]
 
     for col in ["Manufacturer", "RAM Type", "Lighting"]:
         if col in filters:
@@ -185,10 +190,7 @@ def apply_ram_filters(df, filters=None):
 # Convenience Function: Apply All Filters
 # ----------------------------------------------------------------------
 def apply_all_filters(df_gpus, df_cpus, df_mbs, df_rams,
-                      gpu_filters=None,
-                      cpu_filters=None,
-                      mb_filters=None,
-                      ram_filters=None):
+                      gpu_filters, cpu_filters, mb_filters, ram_filters):
     """
     Applies filters to all four component DataFrames and returns them.
     Also checks if any filtered DataFrame is empty and raises an error if so.
@@ -334,6 +336,21 @@ def generate_all_filter_options(df_gpus, df_cpus, df_mbs, df_rams):
         "RAMs": generate_filter_options(df_rams, ram_filter_spec)
     }
     return options
+
+def filter_builds_by_price_range(builds_df, min_price, max_price):
+    """
+    Filters the builds DataFrame by ensuring that the build's Price Min falls within the specified range.
+    
+    Args:
+        builds_df (pd.DataFrame): DataFrame containing builds with a "Price Min" column.
+        min_price (float): Minimum acceptable price.
+        max_price (float): Maximum acceptable price.
+        
+    Returns:
+        pd.DataFrame: Filtered DataFrame where Price Min is within the given range.
+    """
+    price_filtered_builds = builds_df[(builds_df["Price Min"] >= min_price) & (builds_df["Price Min"] <= max_price)]
+    return price_filtered_builds
 
 # ----------------------------------------------------------------------
 # Example Test in Main

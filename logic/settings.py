@@ -39,7 +39,47 @@ RELEVANCE_MATRIX = {
 
 ALPHA = 0.7
 MIN_PRICE = 500
-MAX_PRICE = 1000
+MAX_PRICE = 2000
+
+GPU_FILTERS = {
+    "Brand": None,
+    "Series": None,
+    "Manufacturer": None,
+    "Memory Capacity": (None, None),  # Minimum 8GB
+    "Power": (None, None),          # Maximum 300W
+    "CUDA Ready": None,             # 1 representing True
+    "PCIe Version": None
+}
+
+CPU_FILTERS = {
+    "Brand": None,
+    "Type": None,
+    "Series": None,
+    "Cores": (None, None),         # At least 12 cores
+    "Threads": (None, None),
+    "CPU Socket": None,
+    "Direct PCIe Version": None,
+    "Cooler": None
+}
+
+MB_FILTERS = {
+    "Manufacturer": None,
+    "Form Factor": None,
+    "CPU Socket": None,
+    "Chipset": None,
+    "RAM Type": None,
+    "Max Capacity": (None, None),  # Supports at least 128GB
+    "Modules": (None, None),
+    "PCIe Version": None
+}
+   
+RAM_FILTERS = {
+    "Manufacturer": None,
+    "RAM Type": None,
+    "Data Rate": (None, None),  # Up to 4800
+    "Capacity": (None, None),      # At least 8GB per module/kit
+    "Lighting": None
+}
 
 USER_WEIGHTS = {
         "Gaming": 8,

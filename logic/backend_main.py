@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import time
 from logic.data_loader import load_specifications
 from logic.data_preprocessor import preprocess_data

@@ -4,7 +4,7 @@ class AboutDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("About PC Builder")
-        self.resize(400, 300)
+        self.resize(1200, 600)
         layout = QVBoxLayout(self)
 
         # Scrollable area
@@ -16,138 +16,143 @@ class AboutDialog(QDialog):
         scroll_layout = QVBoxLayout(scroll_content)
 
         about_text = """
-# PC Builder App Documentation
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Builder App Documentation</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
+        h1, h2, h3 { color: #333; }
+        ul { margin-left: 20px; }
+        code { background-color: #f4f4f4; padding: 2px 5px; border-radius: 5px; }
+        pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>PC Builder App Documentation</h1>
 
-## Overview
-The PC Builder App is a GUI‐based Python application designed to help users select an optimal combination of PC components (CPUs, GPUs, Motherboards, and RAM) based on user-defined requirements and performance priorities. The app loads component specifications from an Excel database, preprocesses and filters the data, scores individual components, and then generates "builds" (complete PC configurations) that satisfy compatibility and performance criteria. Finally, it ranks these builds using a composite recommendation score that balances raw performance with cost efficiency.
+    <h2>Overview</h2>
+    <p>The PC Builder App is a GUI-based Python application designed to help users select an optimal combination of PC components based on user-defined requirements and performance priorities.</p>
+    
+    <h2>Key Features</h2>
+    <h3>Dynamic Data Loading</h3>
+    <p>The app reads component specifications from an Excel file where each sheet corresponds to a component category:</p>
+    <ul>
+        <li>Performance scores</li>
+        <li>Pricing (minimum and maximum)</li>
+        <li>Power consumption</li>
+        <li>Key compatibility information</li>
+    </ul>
 
-## Key Features
+    <h3>Data Preprocessing</h3>
+    <p>Loaded data is preprocessed to:</p>
+    <ul>
+        <li>Normalize performance scores</li>
+        <li>Compute an average price</li>
+        <li>Assign unique IDs</li>
+        <li>Convert multi-element fields to a "best slot" value</li>
+    </ul>
 
-### Dynamic Data Loading
-The app reads component specifications from an Excel file where each sheet corresponds to a component category (CPUs, GPUs, Motherboards, and RAM). This database includes:
-- Performance scores
-- Pricing (minimum and maximum)
-- Power consumption
-- Key compatibility information (such as socket type, PCIe versions, and RAM specifications)
+    <h3>Advanced Filtering</h3>
+    <p>Users can set detailed filters for each component type:</p>
+    <ul>
+        <li><strong>CPUs</strong>: Brand, type, series, core count, socket, PCIe version, packaging, cooler inclusion</li>
+        <li><strong>GPUs</strong>: Brand, series, memory capacity, power, PCIe version</li>
+        <li><strong>Motherboards</strong>: Manufacturer, form factor, CPU socket, chipset, RAM type, PCIe slots</li>
+        <li><strong>RAM</strong>: Manufacturer, RAM type, data rate, capacity, lighting options</li>
+    </ul>
 
-### Data Preprocessing
-Loaded data is preprocessed to:
-- Normalize performance scores (e.g., Gaming Score, ML/AI Score, HPC Score, 3D Rendering Score) to a 0–100 scale.
-- Compute an average price from the minimum and maximum prices.
-- Assign unique IDs to each component.
-- Convert certain multi-element fields (e.g., PCIe lanes) to a "best slot" value.
+    <h3>Component Scoring</h3>
+    <p>Each component is scored based on multiple use-case scenarios (Gaming, ML/AI, HPC, 3D Rendering).</p>
 
-### Advanced Filtering
-Users can set detailed filters (via the GUI) for each component type. Filters include:
-- **CPUs**: Brand, type, series, core count, socket, PCIe version, packaging (box/tray), and cooler inclusion.
-- **GPUs**: Brand, series, memory capacity, power, PCIe version, and more.
-- **Motherboards**: Manufacturer, form factor, CPU socket, chipset, supported RAM type, maximum capacity, and PCIe slots.
-- **RAM**: Manufacturer, RAM type, data rate, capacity, lighting options, etc.
+    <h3>Batched Build Generation</h3>
+    <p>The app generates PC builds in batches per CPU.</p>
+    <h4>Compatibility Filtering</h4>
+    <ul>
+        <li>Motherboards: Filtered based on matching CPU socket and chipset compatibility</li>
+        <li>GPUs: Filtered based on PCIe lane requirements</li>
+        <li>RAM: Filtered based on CPU and motherboard compatibility</li>
+    </ul>
 
-Additionally, the filtering function excludes components whose minimum price exceeds the user’s maximum allowed price. The app provides dynamic filter options based on the unique values in the database.
+    <h4>Cross Joining & Aggregation</h4>
+    <p>Filtered components are cross-joined and further filtered. Composite fields such as total price and power are computed.</p>
 
-### Component Scoring
-Each component is scored based on multiple use-case scenarios (Gaming, ML/AI, HPC, 3D Rendering). The score is computed as a weighted average, comparing a component’s specs against a baseline model. User-adjustable task weights (set via sliders in the GUI) influence these scores.
+    <h3>Scoring and Ranking</h3>
+    <p>Builds are scored using a weighted harmonic mean of component scores, applying penalties where needed.</p>
 
-### Batched Build Generation
-Instead of generating the full Cartesian product (which can be prohibitively large), the app processes builds in batches per CPU. For each CPU:
+    <h3>Final Aggregation</h3>
+    <p>Top builds from each CPU batch are merged and ranked based on a final recommendation score.</p>
 
-#### Compatibility Filtering
-- **Motherboards**: Filtered based on matching CPU socket and chipset compatibility.
-- **GPUs**: GPUs are filtered so that the CPU’s "Direct Lanes" (best slot value) is at least the GPU’s required "Wired Lanes."
-- **RAM**: RAM candidates are filtered in two stages:
-  - **CPU Compatibility**: The motherboard’s RAM type must be among the CPU’s supported types; also, the RAM’s data rate and capacity must fall within the CPU’s limits.
-  - **Motherboard Compatibility**: The RAM’s type must match the motherboard’s supported RAM type, and its data rate and capacity must be within the motherboard’s limits.
+    <h2>Graphical User Interface (GUI)</h2>
+    <h3>Main Window</h3>
+    <ul>
+        <li>Sliders for task weight adjustment</li>
+        <li>Alpha parameter slider for performance vs. efficiency trade-off</li>
+        <li>Price range selectors</li>
+        <li>Buttons for filters, advanced settings, and about section</li>
+    </ul>
+    
+    <h3>Filters Dialog</h3>
+    <p>Allows users to set detailed filters using dropdowns, checkboxes, and sliders.</p>
 
-#### Cross Joining
-The filtered motherboards and GPUs are cross-joined and further filtered based on slot lane requirements. This set is then cross-joined with the filtered RAMs.
+    <h3>Build Details Dialog</h3>
+    <p>Displays detailed specifications for each component.</p>
 
-#### Aggregation
-For each valid build (combination of CPU, MB, GPU, and RAM), composite fields such as:
-- Total Price (Price Min and Price Max)
-- Total Power
-- Leftover CPU Lanes
+    <h2>Project Architecture</h2>
+    <h3>Logic Modules</h3>
+    <ul>
+        <li><code>logic/data_loader.py</code>: Loads the Excel database.</li>
+        <li><code>logic/data_preprocessor.py</code>: Preprocesses data.</li>
+        <li><code>logic/filters.py</code>: Implements filtering functions.</li>
+        <li><code>logic/component_scoring.py</code>: Computes weighted task scores.</li>
+        <li><code>logic/build_scoring.py</code>: Computes final build scores.</li>
+        <li><code>logic/recommendation.py</code>: Computes recommendation scores.</li>
+        <li><code>logic/build_maker.py</code>: Implements batched build generation.</li>
+    </ul>
 
-are calculated.
+    <h3>GUI Modules</h3>
+    <ul>
+        <li><code>gui/main_window.py</code>: Main application window.</li>
+        <li><code>gui/filters_dialog.py</code>: Filtering options dialog.</li>
+        <li><code>gui/build_details_dialog.py</code>: Displays build details.</li>
+        <li><code>gui/about_dialog.py</code>: Provides information.</li>
+    </ul>
 
-### Scoring and Ranking
-Each CPU batch is processed:
-1. Builds are filtered by overall price.
-2. Builds are scored using a function that computes a weighted harmonic mean of component scores, applies a PCIe version penalty, and a performance imbalance penalty.
-3. Builds are ranked by a composite recommendation score.
-4. Within the batch, builds are grouped (e.g., by GPU) and the top *n* builds (e.g., top 10) are selected.
+    <h3>Other Files</h3>
+    <ul>
+        <li><code>main.py</code>: Entry point of the application.</li>
+    </ul>
 
-### Final Aggregation
-The top builds from each CPU batch are concatenated, and a final recommendation scoring is applied to produce the overall ranked list of builds.
+    <h2>Data Flow</h2>
+    <ol>
+        <li>Data Loading & Preprocessing</li>
+        <li>Filtering</li>
+        <li>Component Scoring</li>
+        <li>Batched Build Generation</li>
+        <li>Final Recommendation & Ranking</li>
+        <li>GUI Presentation</li>
+    </ol>
 
-## Recommendation Scoring
-The final build score is computed using:
-- **Performance Score (P)**: Derived from the weighted harmonic mean of the GPU, CPU, and RAM task scores.
-- **Efficiency Score (E)**: Computed as Build Score divided by Price Min.
+    <h2>Performance Optimization</h2>
+    <ul>
+        <li>Early filtering</li>
+        <li>Batched processing</li>
+        <li>Vectorized operations</li>
+    </ul>
 
-Both scores are normalized and combined using a trade-off parameter **alpha** (adjustable via the GUI) to produce a composite Recommendation Score. Builds are then sorted based on this score.
+    <h2>Potential Future Enhancements</h2>
+    <ul>
+        <li>Multithreading or multiprocessing</li>
+        <li>Lazy evaluation</li>
+        <li>Dynamic database updates</li>
+    </ul>
 
-## Graphical User Interface (GUI)
-Built with PyQt6, the GUI includes:
-
-### Main Window
-- Sliders for task weight adjustment
-- Alpha parameter slider for performance vs. efficiency trade-off
-- Price range selectors (min and max)
-- Buttons to open a detailed filters dialog, advanced settings, and an About window
-- A table displaying recommended builds
-
-### Filters Dialog
-Allows users to select filtering options for each component category using dropdowns, checkboxes, and sliders.
-
-### Build Details Dialog
-Displays detailed specifications for each component, including links, product names, and additional specs.
-
-### Advanced Settings and About Dialogs
-Provide additional configuration options and information about the application.
-
-## Project Architecture
-The project is organized into several modules:
-
-### Logic Modules
-- `logic/data_loader.py`: Loads the Excel database into pandas DataFrames.
-- `logic/data_preprocessor.py`: Preprocesses data by normalizing scores, computing average prices, and assigning unique IDs.
-- `logic/filters.py`: Implements filtering functions for each component category.
-- `logic/component_scoring.py`: Computes weighted task scores for individual components.
-- `logic/build_scoring.py`: Computes the final build score with penalties for PCIe mismatches and performance imbalances.
-- `logic/recommendation.py`: Computes composite recommendation scores for builds.
-- `logic/smart_picker.py`: (Optional) Groups similar components to reduce duplication and search space.
-- `logic/build_maker.py`: Implements batched build generation per CPU.
-
-### GUI Modules
-- `gui/main_window.py`: Main application window.
-- `gui/filters_dialog.py`: Filtering options dialog.
-- `gui/build_details_dialog.py`: Displays build details.
-- `gui/about_dialog.py` & `gui/advanced_settings_dialog.py`: Provide additional information and configuration options.
-
-### Other Files
-- `main.py`: The application’s entry point, creating the QApplication and starting the event loop.
-
-## Data Flow
-1. **Data Loading & Preprocessing**: Load and preprocess component data from an Excel file.
-2. **Filtering**: Apply user-defined filters and early price-based exclusion.
-3. **Component Scoring**: Compute individual component scores.
-4. **Batched Build Generation**: Generate, filter, score, and rank builds per CPU.
-5. **Final Recommendation & Ranking**: Merge top builds and compute final recommendation scores.
-6. **GUI Presentation**: Display ranked builds in an interactive table.
-
-## Performance Optimization
-- **Early Filtering**: Exclude components by price and compatibility before build generation.
-- **Batched Processing**: Process builds in manageable batches per CPU.
-- **Vectorized Operations**: Use Pandas vectorized operations for filtering and merging.
-
-## Potential Future Enhancements
-- **Multithreading or Multiprocessing**: Parallelizing batched build generation.
-- **Lazy Evaluation**: Using generators to yield builds on-demand.
-- **Dynamic Database Updates**: Allowing updates from online sources.
-
-## Conclusion
-The PC Builder app integrates data loading, preprocessing, filtering, component scoring, and batched build generation to recommend optimal PC builds that balance performance and cost. Its modular design ensures flexibility, maintainability, and scalability for future improvements.
+    <h2>Conclusion</h2>
+    <p>The PC Builder app integrates multiple functionalities to recommend optimal PC builds based on performance and cost efficiency.</p>
+</body>
+</html>
 
 
         """

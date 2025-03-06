@@ -130,4 +130,3 @@ The project is organized into several modules:
 
 ## Conclusion
 The PC Builder app integrates data loading, preprocessing, filtering, component scoring, and batched build generation to recommend optimal PC builds that balance performance and cost. Its modular design ensures flexibility, maintainability, and scalability for future improvements.
-

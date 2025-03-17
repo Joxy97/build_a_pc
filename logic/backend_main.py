@@ -1,5 +1,5 @@
 import time
-from logic.data_loader import load_specifications
+from logic.data_loader import load_specifications, load_specifications_products
 from logic.data_preprocessor import preprocess_data
 from logic.filters import apply_all_filters, generate_all_filter_options, filter_builds_by_price_range
 from logic.component_scoring import score_all_dfs
@@ -41,7 +41,7 @@ def run_backend(alpha=ALPHA, min_price=MIN_PRICE, max_price=MAX_PRICE, gpu_filte
     # 6. Generate builds and filter them by price. Processes data in batches by CPUs, filters every batch by price, scores, calculates recommendation scores, groups by GPUs and picks top N.
     # Concatenates batches and calculates recommendation scores on the entire builds list.
     builds_df = build_maker_batched(scored_gpus, scored_cpus, scored_mbs, scored_rams, min_price, max_price, user_weights, alpha, top_n=10)
-    builds_df = builds_df[["GPU", "CPU", "Motherboard", "RAM", "Total Power", "Price Min", "Build Score", "Recommendation Score"]].sort_values(by="Recommendation Score", ascending=False)
+    builds_df = builds_df[["GPU", "CPU", "Motherboard", "RAM", "Total Power", "Price Min", "Build Score", "Recommendation Score", "GPU ID", "CPU ID", "MB ID", "RAM ID"]].sort_values(by="Recommendation Score", ascending=False)
 
     return builds_df
 
